@@ -14,6 +14,7 @@
     "socket.io": "^4.8.1"
   },
   "dependencies": {
+    "crypto-js": "^4.2.0",
     "socket.io-client": "^4.8.1"
   }
 }
