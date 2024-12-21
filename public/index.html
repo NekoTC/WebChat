@@ -161,9 +161,9 @@
       return `https://q1.qlogo.cn/g?b=qq&nk=${qqNumber}&s=100`;
     } else if (email.includes('@')) {
       const hash = md5(email.trim().toLowerCase());
-      return `https://www.gravatar.com/avatar/${hash}?s=100&d=identicon`;
+      return `https://cravatar.cn/avatar/${hash}?s=100&d=identicon`;
     } else {
-      return 'https://via.placeholder.com/100';
+      return 'https://cravatar.cn/avatar/';
     }
   }
 
