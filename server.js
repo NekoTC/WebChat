@@ -36,6 +36,14 @@ io.on('connection', (socket) => {
         delete users[socket.id];
         io.emit('updateUserList', Object.entries(users));
     });
+    socket.on('typing', (username) => {
+        io.emit('userTyping', username); // 广播给所有用户，包括本人
+    });
+
+// 处理“停止输入”事件
+    socket.on('stopTyping', (username) => {
+        io.emit('userStopTyping', username); // 广播给所有用户，包括本人
+    });
 });
 
 const PORT = process.env.PORT || 3000;

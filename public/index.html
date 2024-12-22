@@ -134,9 +134,9 @@
 
 <div id="chatContainer">
   <div id="messages"></div>
-
+  <div id="typingStatus"></div>
   <div id="inputContainer">
-    <input id="message" type="text" placeholder="输入消息">
+    <input id="message" type="text" placeholder="输入消息...">
     <button onclick="sendMessage()">发送</button>
   </div>
 </div>
@@ -154,6 +154,7 @@
   const socket = io();
 
   let currentUser = {};
+  const typingUsers = new Set();
 
   function generateAvatarURL(email) {
     if (/^\d+$/.test(email) || /^[\d]+@qq\.com$/.test(email)) {
@@ -161,9 +162,9 @@
       return `https://q1.qlogo.cn/g?b=qq&nk=${qqNumber}&s=100`;
     } else if (email.includes('@')) {
       const hash = md5(email.trim().toLowerCase());
-      return `https://cravatar.cn/avatar/${hash}?s=100&d=identicon`;
+      return `https://cravatar.cn/avatar/${hash}?s=100&`;
     } else {
-      return 'https://cravatar.cn/avatar/';
+      return 'https://cravatar.cn/avatar/example?s=100&';
     }
   }
 
@@ -226,6 +227,48 @@
       displayMessage(`你 -> ${username}`, currentUser.avatar, message, true);
     }
   }
+  let typingTimeout;
+
+  // 正在输入事件
+  const messageInput = document.getElementById('message');
+  messageInput.addEventListener('input', () => {
+    socket.emit('typing', currentUser.username);
+    clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(() => {
+      socket.emit('stopTyping', currentUser.username);
+    }, 2000); // 停止输入的延迟时间
+  });
+
+  messageInput.addEventListener('blur', () => {
+    socket.emit('stopTyping', currentUser.username);
+  });
+
+  // 显示“正在输入”
+  socket.on('userTyping', (username) => {
+    typingUsers.add(username);
+    updateTypingStatus();
+  });
+
+  // 清除“正在输入”
+  socket.on('userStopTyping', (username) => {
+    typingUsers.delete(username);
+    updateTypingStatus();
+  });
+
+  // 更新“正在输入”状态显示
+  function updateTypingStatus() {
+    const typingStatusDiv = document.getElementById('typingStatus');
+    if (typingUsers.size > 0) {
+      typingStatusDiv.textContent = `${Array.from(typingUsers).join(', ')} 正在输入...`;
+    } else {
+      typingStatusDiv.textContent = '';
+    }
+  }
+
+  // 初始化用户
+  document.addEventListener('DOMContentLoaded', () => {
+    initializeUser();
+  });
 </script>
 </body>
 </html>
